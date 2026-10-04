@@ -66,7 +66,26 @@ body {
   font-size: 1.5rem;
   line-height: 1.25;
   letter-spacing: -0.01em;
+}.workbook-cta { margin: 14px 0 0; }
+.workbook-cta a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-decoration: none;
 }
+.workbook-cta a:hover { background: var(--accent-hover); }
+.workbook-cta a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+
 .lede {
   margin: 0;
   color: var(--text-muted);
