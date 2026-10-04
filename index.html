@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Etsy Profit Calculator</title>
+  <meta name="description" content="Estimate profit, margin, break-even price and target margin price for one item sold once on Etsy (US, USD).">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>Etsy Profit Calculator</h1>
+      <p class="lede">Estimate profit for one item in one order on Etsy US. All amounts in USD. Everything is calculated in your browser.</p>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <form id="calc-form" class="panel" novalidate aria-labelledby="form-title">
+      <h2 id="form-title" class="visually-hidden">Calculator inputs</h2>
+
+      <fieldset>
+        <legend>What the buyer pays</legend>
+
+        <div class="field" data-field="sellingPrice">
+          <label for="sellingPrice">Selling Price <span class="req">required</span></label>
+          <div class="money">
+            <span class="prefix" aria-hidden="true">$</span>
+            <input id="sellingPrice" name="sellingPrice" type="text" inputmode="decimal" autocomplete="off" placeholder="Enter item price" aria-describedby="sellingPrice-error" required>
+          </div>
+          <p class="error" id="sellingPrice-error"></p>
+        </div>
+
+        <div class="field" data-field="shippingCharged">
+          <label for="shippingCharged">Shipping Charged</label>
+          <div class="money">
+            <span class="prefix" aria-hidden="true">$</span>
+            <input id="shippingCharged" name="shippingCharged" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" aria-describedby="shippingCharged-hint shippingCharged-error">
+          </div>
+          <p class="hint" id="shippingCharged-hint">Shipping the buyer pays you. Optional, blank counts as $0.</p>
+          <p class="error" id="shippingCharged-error"></p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Your costs</legend>
+
+        <div class="field" data-field="productCost">
+          <label for="productCost">Product Cost <span class="req">required</span></label>
+          <div class="money">
+            <span class="prefix" aria-hidden="true">$</span>
+            <input id="productCost" name="productCost" type="text" inputmode="decimal" autocomplete="off" placeholder="Enter your cost to make or buy" aria-describedby="productCost-hint productCost-error" required>
+          </div>
+          <p class="hint" id="productCost-hint">Materials or wholesale cost for one item. Use 0 if none.</p>
+          <p class="error" id="productCost-error"></p>
+        </div>
+
+        <div class="grid-2">
+          <div class="field" data-field="packagingCost">
+            <label for="packagingCost">Packaging Cost</label>
+            <div class="money">
+              <span class="prefix" aria-hidden="true">$</span>
+              <input id="packagingCost" name="packagingCost" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" aria-describedby="optional-hint packagingCost-error">
+            </div>
+            <p class="error" id="packagingCost-error"></p>
+          </div>
+
+          <div class="field" data-field="shippingCost">
+            <label for="shippingCost">Shipping Cost</label>
+            <div class="money">
+              <span class="prefix" aria-hidden="true">$</span>
+              <input id="shippingCost" name="shippingCost" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" aria-describedby="optional-hint shippingCost-error">
+            </div>
+            <p class="error" id="shippingCost-error"></p>
+          </div>
+
+          <div class="field" data-field="otherCost">
+            <label for="otherCost">Other Cost</label>
+            <div class="money">
+              <span class="prefix" aria-hidden="true">$</span>
+              <input id="otherCost" name="otherCost" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" aria-describedby="optional-hint otherCost-error">
+            </div>
+            <p class="error" id="otherCost-error"></p>
+          </div>
+        </div>
+        <p class="hint" id="optional-hint">Packaging, shipping and other costs are optional. Blank counts as $0.</p>
+      </fieldset>
+
+      <fieldset class="field" data-field="offsiteAdsMode" aria-describedby="offsiteAdsMode-hint offsiteAdsMode-error">
+        <legend>Offsite Ads</legend>
+        <div class="segmented">
+          <input type="radio" id="ads-none" name="offsiteAdsMode" value="none" checked>
+          <label for="ads-none">No</label>
+          <input type="radio" id="ads-12" name="offsiteAdsMode" value="low_12">
+          <label for="ads-12">12%</label>
+          <input type="radio" id="ads-15" name="offsiteAdsMode" value="high_15">
+          <label for="ads-15">15%</label>
+        </div>
+        <p class="hint" id="offsiteAdsMode-hint">Choose a rate if this order came from an Etsy Offsite Ad. The fee is capped at <span data-config="offsiteAdsCap"></span> per order.</p>
+        <p class="error" id="offsiteAdsMode-error"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Pricing goal</legend>
+        <div class="field" data-field="targetMarginPercent">
+          <label for="targetMarginPercent">Target Margin (%)</label>
+          <div class="money suffix-field">
+            <input id="targetMarginPercent" name="targetMarginPercent" type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a percent" aria-describedby="targetMarginPercent-hint targetMarginPercent-error">
+            <span class="suffix" aria-hidden="true">%</span>
+          </div>
+          <p class="hint" id="targetMarginPercent-hint">Optional. From 0 up to (not including) 100. We'll find the lowest price that reaches it.</p>
+          <p class="error" id="targetMarginPercent-error"></p>
+        </div>
+      </fieldset>
+
+      <details class="advanced">
+        <summary>Advanced</summary>
+        <div class="field" data-field="buyerSalesTax">
+          <label for="buyerSalesTax">Buyer Sales Tax</label>
+          <div class="money">
+            <span class="prefix" aria-hidden="true">$</span>
+            <input id="buyerSalesTax" name="buyerSalesTax" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" aria-describedby="buyerSalesTax-hint buyerSalesTax-error">
+          </div>
+          <p class="hint" id="buyerSalesTax-hint">Sales tax the buyer pays on this order. It is not your revenue, but the payment processing fee is charged on it. Optional, blank counts as $0.</p>
+          <p class="error" id="buyerSalesTax-error"></p>
+        </div>
+      </details>
+
+      <div class="form-error" id="form-error" hidden></div>
+
+      <button type="submit" class="btn-primary">Calculate</button>
+    </form>
+
+    <section class="panel results" aria-labelledby="results-title">
+      <h2 id="results-title">Results</h2>
+
+      <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+      <p id="results-empty" class="empty">Enter your numbers and press <strong>Calculate</strong> to see your estimated profit.</p>
+
+      <div id="results-body" hidden>
+        <div class="headline">
+          <div class="metric">
+            <p class="metric-label">Estimated Profit</p>
+            <p class="metric-value" id="out-netProfit">—</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">Profit Margin</p>
+            <p class="metric-value" id="out-marginPercent">—</p>
+            <p class="status" id="out-status" hidden></p>
+          </div>
+        </div>
+        <p id="profit-unavailable" class="note-inline" hidden>Fix the highlighted inputs to see profit and margin.</p>
+
+        <h3>Fee and cost breakdown</h3>
+        <dl class="breakdown" id="breakdown">
+          <div><dt>Revenue <span class="sub">price + shipping charged</span></dt><dd id="out-revenue">—</dd></div>
+          <div><dt>Product Costs <span class="sub">product + packaging + shipping + other</span></dt><dd id="out-productCosts">—</dd></div>
+          <div><dt>Transaction Fee <span class="sub" data-config="transactionLabel"></span></dt><dd id="out-transactionFee">—</dd></div>
+          <div><dt>Payment Processing Fee <span class="sub" data-config="paymentLabel"></span></dt><dd id="out-paymentProcessingFee">—</dd></div>
+          <div><dt>Listing Fee</dt><dd id="out-listingFee">—</dd></div>
+          <div><dt>Offsite Ads Fee</dt><dd id="out-offsiteAdsFee">—</dd></div>
+          <div class="total"><dt>Total Etsy Fees</dt><dd id="out-totalFees">—</dd></div>
+        </dl>
+
+        <h3>Pricing</h3>
+        <div class="prices">
+          <div class="price-card">
+            <p class="metric-label">Break-even Price</p>
+            <p class="price-value" id="out-breakEven">—</p>
+            <p class="price-note" id="out-breakEven-note">Lowest price with no loss, keeping your other inputs the same.</p>
+          </div>
+          <div class="price-card">
+            <p class="metric-label">Target Margin Price</p>
+            <p class="price-value" id="out-target">—</p>
+            <p class="price-note" id="out-target-note">Enter a Target Margin to see this price.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="notices">
+        <p>Margin labels are general planning indicators, not financial advice.</p>
+        <p>The $0.20 listing fee is a planning approximation for one product sold once.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>Estimates only. Fee rates are fixed planning values; check Etsy's current fee schedule before setting prices. Your inputs stay on this device and are not sent anywhere.</p>
+  </footer>
+</body>
+</html>
